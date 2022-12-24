@@ -5,6 +5,12 @@
 ### **数据库将会保存你的Github用户名/公开邮箱, 并记录你使用的临时邮箱的发件人/时间/主题, 但不会保存内容**
 
 
+## Demo
+
+前往`release`下载`Go_Share_Mail_Client_Windows_Amd64.exe`, 即可使用`GUI`界面的临时域名邮箱服务
+
+`GUI client`暂时没有开源（我太菜了这部分代码有些见不得人）
+
 ## 如何使用
 
 ### 1. 准备工作: 前往[`https://api.fishzemail.top/login`](https://api.fishzemail.top/login), 通过`Github`授权认证
