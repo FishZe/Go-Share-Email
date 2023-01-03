@@ -2,6 +2,14 @@
 
 #### 可以用来干一切你想用邮箱干的事情，但是不会留下任何痕迹。
 
+### **数据库将会保存你的Github用户名/公开邮箱, 并记录你使用的临时邮箱的发件人/时间/主题, 但不会保存内容**
+
+
+## Demo
+
+前往`release`下载`Go_Share_Mail_Client_Windows_Amd64.exe`, 即可使用`GUI`界面的临时域名邮箱服务
+
+`GUI client`暂时没有开源（我太菜了这部分代码有些见不得人）
 
 ## 如何使用
 
@@ -143,3 +151,67 @@
 ## 如何部署
 
 太麻烦了, 之后再写吧.
+
+## `Python`快速使用脚本
+
+请填入uuid即可使用
+
+```python
+import json
+import sys
+import time
+import requests
+
+uuid = ""
+
+BASE_URL = "https://api.fishzemail.top/"
+HEADER = {"Authorization": uuid}
+LAST_DATA = 0
+
+def get_new_account()-> (tuple[None, None] | tuple):
+    url = BASE_URL + "mail/new"
+    r = requests.post(url,headers=HEADER, timeout=10)
+    res = json.loads(r.text)
+    if res["code"] != 0:
+        return None, None
+    return res['data']['email'], res['data']['emailId']
+
+
+def receive_new_email(emailId: str)-> (dict | None):
+    url = BASE_URL + "mail/query"
+    data = {"emailId": emailId}
+    r = requests.post(url,headers=HEADER,data=data,timeout=10)
+    res = json.loads(r.text)
+    if res["code"] != 0:
+        return None
+    return res['data']['mails']
+
+
+def print_email(now_mail:dict) -> None:
+    print("From: {}".format(now_mail['from']))
+    print("To: {}".format(now_mail['to']))
+    print("Subject: {}".format(now_mail['subject']))
+    print("TimeStalp: {}".format((now_mail['data'])))
+    print("Content: {}".format(now_mail['plain_text']))
+    print()
+
+if __name__ == "__main__":
+    email, emailId = get_new_account()
+    if email is None:
+        print("Failed to get new account")
+        sys.exit(1)
+    print("Your email is: {}".format(email))
+    while True:
+        emails = receive_new_email(emailId)
+        if emails is not None:
+            for email in emails:
+                if LAST_DATA < email["data"]:
+                    print_email(email)
+                else :
+                    LAST_DATA = email["data"]
+            con = input("Continue? [Y/n]")
+            if con.lower() == "n":
+                break
+        time.sleep(0.5)
+
+```
