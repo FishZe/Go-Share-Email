@@ -73,15 +73,8 @@ func main() {
 		log.Fatal("请先配置config.yaml文件")
 		return
 	}
-	err = initDB()
-	if err != nil {
-		log.Fatal(err)
-	}
-	err = initImap()
-	if err != nil {
-		log.Printf("init imap failed: %v", err)
-		return
-	}
+	connectImap()
+	connectDB()
 	go checkUpdate()
 	limiter = rate.NewLimiter(1000, 1000)
 	router := gin.Default()
@@ -97,7 +90,15 @@ func main() {
 			login.GET("/redirect", LimitRate(), RedirectGithub)
 		}
 	}
-	err = router.Run(":" + strconv.Itoa(conf.Port))
+	s := &http.Server{
+		Addr:    ":" + strconv.Itoa(conf.Port),
+		Handler: router,
+	}
+	s.SetKeepAlivesEnabled(false)
+	err = s.ListenAndServe()
+	if err != nil {
+		return
+	}
 }
 func LimitRate() gin.HandlerFunc {
 	return func(c *gin.Context) {

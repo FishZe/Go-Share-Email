@@ -32,9 +32,10 @@ func connectImap() {
 			err := initImap()
 			if err == nil {
 				connected = true
+				break
 			}
 		}
-		time.Sleep(time.Second * 5)
+		time.Sleep(time.Second * 2)
 	}
 }
 
@@ -68,6 +69,7 @@ func getMessage(mailChan chan Mail) {
 		log.Println("Select error:", err)
 		connected = false
 		connectImap()
+		return
 	}
 	if inBox.Messages == lastCheckSum {
 		return

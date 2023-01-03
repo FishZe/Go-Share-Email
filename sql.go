@@ -25,6 +25,17 @@ type SQLMail struct {
 
 var db *sql.DB
 
+func connectDB() {
+	for {
+		err := initDB()
+		if err != nil {
+			log.Printf("init db failed: %v", err)
+		} else {
+			break
+		}
+	}
+}
+
 func initDB() error {
 	err := errors.New("")
 	db, err = sql.Open("sqlite", "file:./data.db")
@@ -58,6 +69,7 @@ func initDB() error {
 func tableExist(name string) (bool, error) {
 	res, err := db.Query("SELECT name FROM sqlite_master WHERE type='table' AND name = ?", name)
 	if err != nil {
+		connectDB()
 		return false, err
 	}
 	defer func(res *sql.Rows) {
@@ -75,6 +87,7 @@ func tableExist(name string) (bool, error) {
 func insertUser(user SQLUser) error {
 	_, err := db.Exec("INSERT INTO user (name, email, access_token, uuid, node_id) VALUES (?, ?, ?, ?, ?)", user.Name, user.Email, user.AccessToken, user.UUID, user.NodeId)
 	if err != nil {
+		connectDB()
 		return err
 	}
 	return nil
@@ -83,6 +96,7 @@ func insertUser(user SQLUser) error {
 func getUserByNodeID(id string) (SQLUser, error) {
 	rows, err := db.Query("SELECT * FROM user WHERE node_id = ?", id)
 	if err != nil {
+		connectDB()
 		return SQLUser{}, err
 	}
 	defer func(rows *sql.Rows) {
@@ -104,6 +118,7 @@ func getUserByNodeID(id string) (SQLUser, error) {
 func getUserByUUID(uuid string) (SQLUser, error) {
 	rows, err := db.Query("SELECT * FROM user WHERE uuid = ?", uuid)
 	if err != nil {
+		connectDB()
 		return SQLUser{}, err
 	}
 	defer func(rows *sql.Rows) {
@@ -125,6 +140,7 @@ func getUserByUUID(uuid string) (SQLUser, error) {
 func insertEmail(mail SQLMail) {
 	_, err := db.Exec("INSERT INTO mail (user_uuid, email_name, time, from_name, subject) VALUES (?, ?, ?, ?, ?)", mail.UserUUID, mail.EmailName, mail.Time, mail.From, mail.Subject)
 	if err != nil {
+		connectDB()
 		log.Printf("insert email failed: %v", err)
 	}
 }
